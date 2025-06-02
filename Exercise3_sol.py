@@ -1,5 +1,6 @@
 from src.EA.CMAES_sol import CMAES, CMAES_opts
 from src.EA.NSGA import NSGAII, NSGA_opts
+from src.EA.ES import ES, ES_opts
 from src.world.World import World
 from src.world.robot.controllers import MLP
 from src.world.robot.morphology.AntCustomRobot import AntRobot
@@ -29,7 +30,7 @@ class AntWorld(World):
 
         self.n_repeats = 3
         self.n_steps = 1000
-        self.controller = MLP.NNController(state_space, action_space)
+        self.controller = MLP.NN_najaroController(state_space, action_space)
         self.n_weights = self.controller.n_params
 
         self.n_params = self.n_weights + 8
@@ -168,6 +169,7 @@ class AntWorld(World):
         return np.mean(final_rewards), np.mean(final_multi_obj_rewards, axis=0)
 
 
+
 def run_EA_single(ea_single, world):
     print(f"current gen : {ea_single.current_gen}")
     print(f"number of gen : {ea_single.n_gen}")
@@ -180,6 +182,8 @@ def run_EA_single(ea_single, world):
             print(f"j'evolue doucement : individu {index+1}/{len(pop)}")
         ea_single.tell(pop, fitnesses_gen)
         print(f"Generation {gen+1}/{ea_single.n_gen} | Best fitness: {np.max(fitnesses_gen):.2f} | Mean fitness: {np.mean(fitnesses_gen):.2f}")
+                # Visualize the best individual of the current generation
+
 
 def run_EA_multi(ea_multi, world):
     for gen in range(ea_multi.n_gen):
@@ -254,16 +258,24 @@ def main():
     world = AntWorld()
     n_parameters = world.n_params
 
-    population_size = 10
+    population_size = 20
     CMAES_opts["min"] = -1
     CMAES_opts["max"] = 1
-    CMAES_opts["num_parents"] = 5
-    CMAES_opts["num_generations"] = 10
-    CMAES_opts["mutation_sigma"] = 0.33
+    CMAES_opts["num_parents"] = 8
+    CMAES_opts["num_generations"] = 20
+    CMAES_opts["mutation_sigma"] = 0.2
 
     results_dir = os.path.join(ROOT_DIR, 'results', ENV_NAME, 'single')
     ea_single = CMAES(population_size, n_parameters, CMAES_opts, results_dir)
-    ea_single.load_checkpoint()
+    #ea_single.load_checkpoint()
+
+    ES_opts["min"] = -1
+    ES_opts["max"] = 1
+    ES_opts["num_parents"] = 8
+    ES_opts["num_generations"] = 20
+    ES_opts["mutation_sigma"] = 0.2
+
+    ea_single = ES(population_size, n_parameters, ES_opts, results_dir)
 
     run_EA_single(ea_single, world)
 
@@ -288,7 +300,7 @@ def main():
     with open(world.world_file, "w") as f:
         f.write(world_xml)
 
-    generate_best_individual_video(world, 'test_10_gen.mp4')
+    generate_best_individual_video(world, 'test_20_gen_0.2sig_pop20_par8.mp4')
 
 
 if __name__ == "__main__":
