@@ -169,22 +169,15 @@ class AntWorld(World):
 
 
 def run_EA_single(ea_single, world):
-    best_fitnesses = []
-    mean_fitnesses = []
     for gen in range(ea_single.n_gen):
         pop = ea_single.ask()
         fitnesses_gen = np.empty(len(pop))
-        # best_fitnesses.append(np.max(fitnesses_gen))
-        # mean_fitnesses.append(np.mean(fitnesses_gen))
         for index, genotype in enumerate(pop):
             fit_ind, _ = world.evaluate_individual(genotype)
             fitnesses_gen[index] = fit_ind
             print("j'evolue doucement")
         ea_single.tell(pop, fitnesses_gen)
         print(f"Generation {gen+1}/{ea_single.n_gen} | Best fitness: {np.max(fitnesses_gen):.2f} | Mean fitness: {np.mean(fitnesses_gen):.2f}")
-    # np.save("best_fitnesses.npy", best_fitnesses)
-    # np.save("mean_fitnesses.npy", mean_fitnesses)
-
 
 def run_EA_multi(ea_multi, world):
     for gen in range(ea_multi.n_gen):
@@ -252,8 +245,8 @@ def visualise_individual(genotype):
 
 def main():
     # %% Understanding the world
-    genotype = np.random.uniform(-1, 1, 953)  # 8 body parameters, 945 NN weights
-    visualise_individual(genotype)
+    #genotype = np.random.uniform(-1, 1, 953)  # 8 body parameters, 945 NN weights
+    #visualise_individual(genotype)
 
     # %% Optimise single-objective
     world = AntWorld()
@@ -263,11 +256,12 @@ def main():
     CMAES_opts["min"] = -1
     CMAES_opts["max"] = 1
     CMAES_opts["num_parents"] = 100
-    CMAES_opts["num_generations"] = 50
+    CMAES_opts["num_generations"] = 55
     CMAES_opts["mutation_sigma"] = 0.33
 
     results_dir = os.path.join(ROOT_DIR, 'results', ENV_NAME, 'single')
     ea_single = CMAES(population_size, n_parameters, CMAES_opts, results_dir)
+    ea_single.load_checkpoint()
 
     run_EA_single(ea_single, world)
 
