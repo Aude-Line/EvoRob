@@ -91,13 +91,16 @@ class CMAES():
         np.save(os.path.join(curr_gen_path, 'x'), np.array(self.x))
         np.save(os.path.join(curr_gen_path, 'f'), np.array(self.f))
 
-    def load_checkpoint(self):
+    def load_checkpoint(self, checkpoint_ID = -1):
         dir_path = search_file_list(self.directory_name, 'f_best.npy')
         if not dir_path:
             raise FileNotFoundError(f"No checkpoint files found in {self.directory_name}. Ensure checkpoints are being saved.")
 
         # Extract the latest generation from the directory path
-        self.current_gen = int(dir_path[-1].split(("\\") if "\\" in dir_path[-1] else "/")[-2])
+        if(checkpoint_ID == -1):
+            self.current_gen = int(dir_path[-1].split(("\\") if "\\" in dir_path[-1] else "/")[-2])
+        else:
+            self.current_gen = checkpoint_ID
         curr_gen_path = os.path.join(self.directory_name, str(self.current_gen))
         print(f"Loading from: {curr_gen_path}")
 

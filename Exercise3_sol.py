@@ -244,34 +244,8 @@ def visualise_individual(genotype):
     env.close()
     print(np.sum(rewards_list))
 
-
-def main():
-    # %% Understanding the world
-    #genotype = np.random.uniform(-1, 1, 953)  # 8 body parameters, 945 NN weights
-    #visualise_individual(genotype)
-
-    # %% Optimise single-objective
-    world = AntWorld()
-    n_parameters = world.n_params
-
-    population_size = 10
-    CMAES_opts["min"] = -1
-    CMAES_opts["max"] = 1
-    CMAES_opts["num_parents"] = 5
-    CMAES_opts["num_generations"] = 10
-    CMAES_opts["mutation_sigma"] = 0.33
-
-    results_dir = os.path.join(ROOT_DIR, 'results', ENV_NAME, 'single')
-    ea_single = CMAES(population_size, n_parameters, CMAES_opts, results_dir)
-    ea_single.load_checkpoint()
-
-    run_EA_single(ea_single, world)
-
-
-    # %% visualise
-    # TODO: Make a video of the best individual, and plot the fitness curve.
-    last_gen = str(CMAES_opts["num_generations"] - 1)
-    best_individual = np.load(os.path.join(results_dir, last_gen, "x_best.npy"))
+def make_video(world, results_dir, generation, video_name: str = 'EvoRob3_video.mp4'):
+    best_individual = np.load(os.path.join(results_dir, generation, "x_best.npy"))
 
 
     points, connectivity_mat = world.geno2pheno(best_individual)
@@ -288,9 +262,43 @@ def main():
     with open(world.world_file, "w") as f:
         f.write(world_xml)
 
-    generate_best_individual_video(world, 'test_10_gen.mp4')
+    generate_best_individual_video(world, video_name)
+
+
+def main():
+    # %% Understanding the world
+    #genotype = np.random.uniform(-1, 1, 953)  # 8 body parameters, 945 NN weights
+    #visualise_individual(genotype)
+
+    # %% Optimise single-objective
+    world = AntWorld()
+    n_parameters = world.n_params
+
+    population_size = 50
+    CMAES_opts["min"] = -1
+    CMAES_opts["max"] = 1
+    CMAES_opts["num_parents"] = 30
+    CMAES_opts["num_generations"] = 5
+    CMAES_opts["mutation_sigma"] = 0.33
+
+    results_dir = os.path.join(ROOT_DIR, 'results', ENV_NAME, 'single')
+    ea_single = CMAES(population_size, n_parameters, CMAES_opts, results_dir)
+
+    starting_gen = 5
+    ea_single.load_checkpoint(starting_gen)
+    run_EA_single(ea_single, world)
+
+
+    # %% visualise
+    # TODO: Make a video of the best individual, and plot the fitness curve.
+    last_gen = str(CMAES_opts["num_generations"] - 1)
+    make_video(world, results_dir, last_gen, 'last_gen.mp4')
+    
+    make_video(world, results_dir, '4', 'gen_4.mp4')
 
 
 if __name__ == "__main__":
     main()
 
+
+# %%
