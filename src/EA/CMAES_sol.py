@@ -93,25 +93,25 @@ class CMAES():
 
     def load_checkpoint(self):
         dir_path = search_file_list(self.directory_name, 'f_best.npy')
-        assert len(dir_path) > 0;
-        "No files are here, check the directory_name!!"
-        #print("je print qq chose")
-        #print("path",dir_path[-1])
-        self.current_gen = int(dir_path[-1].split(("\\"))[-2])
+        if not dir_path:
+            raise FileNotFoundError(f"No checkpoint files found in {self.directory_name}. Ensure checkpoints are being saved.")
+
+        # Extract the latest generation from the directory path
+        self.current_gen = int(dir_path[-1].split(("\\") if "\\" in dir_path[-1] else "/")[-2])
         curr_gen_path = os.path.join(self.directory_name, str(self.current_gen))
-        #print(f"Loading from: {curr_gen_path}")
-        self.full_fitness = np.load(os.path.join(self.directory_name, 'full_f.npy'))
-        #print("full_fitness",self.full_fitness)
-        self.full_x = np.load(os.path.join(self.directory_name, 'full_x.npy'))
-        #print("full_x",self.full_x)
+        print(f"Loading from: {curr_gen_path}")
+
+        # Load checkpoint files and convert arrays to lists
+        self.full_fitness = list(np.load(os.path.join(self.directory_name, 'full_f.npy')))
+        self.full_x = list(np.load(os.path.join(self.directory_name, 'full_x.npy')))
         self.f_best_so_far = np.load(os.path.join(curr_gen_path, 'f_best.npy'))
-        #print("f_best_so_far",self.f_best_so_far)
         self.x_best_so_far = np.load(os.path.join(curr_gen_path, 'x_best.npy'))
-        #print("x_best_so_far",self.x_best_so_far)
         self.x = np.load(os.path.join(curr_gen_path, 'x.npy'))
         self.f = np.load(os.path.join(curr_gen_path, 'f.npy'))
 
+        # Reinitialize the CMA-ES object
         self.cmaes = self.load_cmeas()
+
         #for x, f in zip(self.full_x, self.full_fitness):
             #self.cmaes.tell(x, f)
 
