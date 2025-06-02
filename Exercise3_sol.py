@@ -169,13 +169,15 @@ class AntWorld(World):
 
 
 def run_EA_single(ea_single, world):
-    for gen in range(ea_single.n_gen):
+    print(f"current gen : {ea_single.current_gen}")
+    print(f"number of gen : {ea_single.n_gen}")
+    for gen in range(ea_single.current_gen, ea_single.n_gen):
         pop = ea_single.ask()
         fitnesses_gen = np.empty(len(pop))
         for index, genotype in enumerate(pop):
             fit_ind, _ = world.evaluate_individual(genotype)
             fitnesses_gen[index] = fit_ind
-            print("j'evolue doucement")
+            print(f"j'evolue doucement : individu {index+1}/{len(pop)}")
         ea_single.tell(pop, fitnesses_gen)
         print(f"Generation {gen+1}/{ea_single.n_gen} | Best fitness: {np.max(fitnesses_gen):.2f} | Mean fitness: {np.mean(fitnesses_gen):.2f}")
 
@@ -252,11 +254,11 @@ def main():
     world = AntWorld()
     n_parameters = world.n_params
 
-    population_size = 200
+    population_size = 10
     CMAES_opts["min"] = -1
     CMAES_opts["max"] = 1
-    CMAES_opts["num_parents"] = 100
-    CMAES_opts["num_generations"] = 55
+    CMAES_opts["num_parents"] = 5
+    CMAES_opts["num_generations"] = 10
     CMAES_opts["mutation_sigma"] = 0.33
 
     results_dir = os.path.join(ROOT_DIR, 'results', ENV_NAME, 'single')
@@ -286,7 +288,7 @@ def main():
     with open(world.world_file, "w") as f:
         f.write(world_xml)
 
-    generate_best_individual_video(world)
+    generate_best_individual_video(world, 'test_10_gen.mp4')
 
 
 if __name__ == "__main__":
